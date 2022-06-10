@@ -1,0 +1,2 @@
+var lorem = 'Elit commodo nisi veniam id id. Non quis incididunt in aliquip esse ex qui. Amet aliqua consectetur occaecat qui reprehenderit Lorem. Mollit veniam dolore cupidatat exercitation cillum velit aliquip magna irure eu exercitation nisi. Sint ad aliqua ipsum non labore deserunt labore minim minimzx.'
+console.log(lorem);
