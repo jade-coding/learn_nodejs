@@ -52,7 +52,7 @@ if(pathname ==='/'){
     fs.readFile(`data/${queryData.id}`,'utf-8', function(err,description)
       {
         console.log(queryData.id+"값입니다.");
-        setTimeout(() => console.log("Asnynchrnozing"), 1000); // 이유를 찾았다.. non-blocking 방식이어서 값이 들어가기전 데이터를 받아버린것임.
+        setTimeout(() => console.log("synchrnozing"), 1000); // 이유를 찾았다.. non-blocking 방식이어서 값이 들어가기전 데이터를 받아버린것임.
         console.log(list);
         var template = `
         <!doctype html>
