@@ -1,12 +1,39 @@
 var http = require('http');
 var fs = require('fs');
 var url = require('url');
+var qs = require('querystring');
+
 const { syncBuiltinESMExports } = require('module');
 
-function printhtml(title,list,description){
- 
-  
+function templateHTML(title,list,description, control){
+ return `<!doctype html>
+ <html>
+ <head>
+   <title>WEB1 - ${title} </title>
+   <meta charset="utf-8">
+ </head>
+ <body>
+   <h1><a href="/">WEB</a></h1>
+   <h2>${list}</h2>  
+       ${control}
+   <h2>${title}</h2>
+   <p>${description}</p>
+ </body>
+ </html>
+ `;
 }
+
+function templateList(filelist){
+  var list = '<ul>';
+  var i = 0;
+  while(i<filelist.length){
+    list = list + `<li><a href="/?id=${filelist[i]}"> ${filelist[i]}</a></li>`;
+    i++;
+    }
+  list += '</ul>';
+  return list;
+}
+
 
 var app = http.createServer(function(request,response){
     var _url = request.url;
@@ -28,56 +55,28 @@ var app = http.createServer(function(request,response){
 
   console.log(pathname);
 
-var list = '<ul>';
+var list ='<ul>';
+var control =  ``;
 if(pathname ==='/'){
-  if(queryData.id === undefined){
+  if(queryData.id === undefined || queryData.id ==='Web'){
     var title ="Web";
-    queryData.id = 'Introduction'; 
+    queryData.id = 'Web'; 
+    control = `<a href="/create">create</a>`;
       }
-
+  else{
+    control= `<a href="/create">create</a> <a href="/update?id=${title}">update</a>`;
+  }
 
       // 페이지에 List 영역을 담당.
-      var dirlist = new Array();
       fs.readdir('./data',function(err,filelist){   // 이 구문을 벗어나면 filelist 값들을 전달받은 전역변수 dirlist의 메모리에서 다 사라짐.. 
-        dirlist = filelist;
-        var i = 0;
-        
-          while(i<dirlist.length){
-            list = list + `<li><a href="/?id=${dirlist[i]}"> ${dirlist[i]}</a></li>`;
-            i++;
-            }
-          list += '</ul>';
-         
+       list = templateList(filelist);
          // console.log(list); // 분명히 list는 전역으로 밖에 선언했지만 이 read 함수를 벗어나는 순간 갖고 있는 값들이 사라짐..
-           
         });
-       
-          
+        
     fs.readFile(`data/${queryData.id}`,'utf-8', function(err,description)
       {
-        // console.log(queryData.id+"값입니다.");
-        setTimeout(() => console.log("synchrnozing") , 10); // 이유를 찾았다.. non-blocking 방식이어서 값이 들어가기전 데이터를 받아버린것임.
-        //넉넉한 ms를 줘야하며 익명함수 내부에 넣어서 처리가 되도록 해야함.
-      
-        // console.log(list);
-        var template = printhtml(title,list,description);
-        //내가 list파일에 <H2>태그 안 씌우니.. 위에서 계속 문제인 것마냥 오류를 계속 호출했음...
-        //
-        var template = `
-        <!doctype html>
-        <html>
-        <head>
-          <title>WEB1 - ${title} </title>
-          <meta charset="utf-8">
-        </head>
-        <body>
-          <h1><a href="/">WEB</a></h1>
-          <h2>${list}</h2>  
-          <a href="/create">create</a>
-          <p>${description}?</p>
-        </body>
-        </html>
-        `;
+        var template = templateHTML(title, list, description ,control);
+       
         response.writeHead(200);
         response.end(template);
       });
@@ -88,14 +87,7 @@ if(pathname ==='/'){
   
     var dirlist = new Array();
     fs.readdir('./data',function(err,filelist){   // 이 구문을 벗어나면 filelist 값들을 전달받은 전역변수 dirlist의 메모리에서 다 사라짐.. 
-      dirlist = filelist;
-      var i = 0;
-    
-        while(i<dirlist.length){
-          list = list + `<li><a href="/?id=${dirlist[i]}"> ${dirlist[i]}</a></li>`;
-          i++;
-          }
-        list += '</ul>';
+      list = templateList(filelist);
        
        // console.log(list); // 분명히 list는 전역으로 밖에 선언했지만 이 read 함수를 벗어나는 순간 갖고 있는 값들이 사라짐..
          
@@ -103,10 +95,10 @@ if(pathname ==='/'){
       
     setTimeout(() => {
     var description=`
-      <form action="http://localhost:3000/process_creat" method="post">
-      <p><input type ="text" name="title"></p>
+      <form action="/create_process" method="post">
+      <p><input type ="text" name="title" placeholder="title"></p>
       <p>
-        <textarea name="description"></textarea>
+        <textarea name="description" placeholder="detail"></textarea>
       </p>
       <p> 
       <input type="submit">
@@ -136,6 +128,51 @@ if(pathname ==='/'){
       //내가 list파일에 <H2>태그 안 씌우니.. 위에서 계속 문제인 것마냥 오류를 계속 호출했음...
       // 
    
+   
+  }
+  else if(pathname === '/create_process'){
+    var body='';
+    request.on('data',function(data){
+      body += data;
+    });
+    request.on('end',function(){
+      var post = qs.parse(body);
+      var title = post.title;
+      var description = post.description;
+      console.log(title);
+      console.log(description);
+      fs.writeFile(`data/${title}`,description,'utf-8',
+      function(err){
+        response.writeHead(302,{Location:`/?id=${title}`});
+        response.end();
+      });
+     });
+  
+   
+  }
+  else if(pathname === '/update'){
+    fs.readdir('./data',function(error,filelist){
+      fs.readFile(`data/${queryData.id}`,'utf-8',function(err, description){
+        var title = queryData.id;
+        var list = templateList(filelist);
+        var control=`<a href="/create">create</a> <a href="/update?id=${title}">update</a>`;
+        template=templateHTML(title,list,
+        `<form action="/update_process" method="post">
+        <p><input type="hidden" name="id" value="${title}">
+        <p><input type ="text" name="title" placeholder="title" value="${title}"></p>
+        <p>
+          <textarea name="description" placeholder="detail">${description}</textarea>
+        </p>
+        <p> 
+        <input type="submit">
+        </p>
+        </form>
+        `,control);
+        response.writeHead(200);
+        response.end(template);
+      })
+    });
+
    
   }
   else{
