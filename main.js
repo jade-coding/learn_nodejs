@@ -1,7 +1,12 @@
 var http = require('http');
 var fs = require('fs');
 var url = require('url');
-var dirlist = new Array();
+const { syncBuiltinESMExports } = require('module');
+
+function printhtml(title,list,description){
+ 
+  
+}
 
 var app = http.createServer(function(request,response){
     var _url = request.url;
@@ -23,67 +28,136 @@ var app = http.createServer(function(request,response){
 
   console.log(pathname);
 
-  
+var list = '<ul>';
 if(pathname ==='/'){
   if(queryData.id === undefined){
     var title ="Web";
-    queryData.id = 'Index'; 
-    fs.readdir('./data',function(err,filelist){   // 이 구문을 벗어나면 filelist 값들을 전달받은 전역변수 dirlist의 메모리에서 다 사라짐.. 
-      // console.log(filelist); checkcode
-      dirlist = filelist;
-      // console.log(dirlist.length); checkcode
-    });
-  }
- 
-  var list = '<ul>';
-  var i = 0;
-  console.log(dirlist[1] +"이거 사실이니??");
-    while(i<dirlist.length){
-      list = list + `<li><a href="/id= ${dirlist[i]}"> ${dirlist[i]}</a></li>`;
-      i++;
-  }
-  list += '</ul>';
-  console.log(list +'hello?');
+    queryData.id = 'Introduction'; 
+      }
 
 
-
-};//tmp
-
-//   fs.readFile(`data/${queryData.id}`,'utf-8', function(err,description)
-//     {
-//       var template = `
-//       <!doctype html>
-//       <html>
-//       <head>
-//         <title>WEB1 - ${title} </title>
-//         <meta charset="utf-8">
-//       </head>
-//       <body>
-//         <h1><a href="/">WEB</a></h1>
-//         ${list}
-//         <h2>${title}</h2>
-//         <p>${description}</p>
-//       </body>
-//       </html>
-//       `;
+      // 페이지에 List 영역을 담당.
+      var dirlist = new Array();
+      fs.readdir('./data',function(err,filelist){   // 이 구문을 벗어나면 filelist 값들을 전달받은 전역변수 dirlist의 메모리에서 다 사라짐.. 
+        dirlist = filelist;
+        var i = 0;
+        
+          while(i<dirlist.length){
+            list = list + `<li><a href="/?id=${dirlist[i]}"> ${dirlist[i]}</a></li>`;
+            i++;
+            }
+          list += '</ul>';
+         
+         // console.log(list); // 분명히 list는 전역으로 밖에 선언했지만 이 read 함수를 벗어나는 순간 갖고 있는 값들이 사라짐..
+           
+        });
+       
+          
+    fs.readFile(`data/${queryData.id}`,'utf-8', function(err,description)
+      {
+        // console.log(queryData.id+"값입니다.");
+        setTimeout(() => console.log("synchrnozing") , 10); // 이유를 찾았다.. non-blocking 방식이어서 값이 들어가기전 데이터를 받아버린것임.
+        //넉넉한 ms를 줘야하며 익명함수 내부에 넣어서 처리가 되도록 해야함.
       
-//       response.writeHead(200);
-//       response.end(template);
-//     });
-// }
-// else{
-//   response.writeHead(404);
-//   response.end('Not found');
-// }
+        // console.log(list);
+        var template = printhtml(title,list,description);
+        //내가 list파일에 <H2>태그 안 씌우니.. 위에서 계속 문제인 것마냥 오류를 계속 호출했음...
+        //
+        var template = `
+        <!doctype html>
+        <html>
+        <head>
+          <title>WEB1 - ${title} </title>
+          <meta charset="utf-8">
+        </head>
+        <body>
+          <h1><a href="/">WEB</a></h1>
+          <h2>${list}</h2>  
+          <a href="/create">create</a>
+          <p>${description}?</p>
+        </body>
+        </html>
+        `;
+        response.writeHead(200);
+        response.end(template);
+      });
+    } 
+  else if(pathname ==='/create'){
+    var title ="Create";
+    queryData.id = 'Creation'; 
+  
+    var dirlist = new Array();
+    fs.readdir('./data',function(err,filelist){   // 이 구문을 벗어나면 filelist 값들을 전달받은 전역변수 dirlist의 메모리에서 다 사라짐.. 
+      dirlist = filelist;
+      var i = 0;
+    
+        while(i<dirlist.length){
+          list = list + `<li><a href="/?id=${dirlist[i]}"> ${dirlist[i]}</a></li>`;
+          i++;
+          }
+        list += '</ul>';
+       
+       // console.log(list); // 분명히 list는 전역으로 밖에 선언했지만 이 read 함수를 벗어나는 순간 갖고 있는 값들이 사라짐..
+         
+      });
+      
+    setTimeout(() => {
+    var description=`
+      <form action="http://localhost:3000/process_creat" method="post">
+      <p><input type ="text" name="title"></p>
+      <p>
+        <textarea name="description"></textarea>
+      </p>
+      <p> 
+      <input type="submit">
+      </p>
+      </form>
+      `;
+
+    var template = `
+      <!doctype html>
+      <html>
+      <head>
+        <title>WEB1 - ${title} </title>
+        <meta charset="utf-8">
+      </head>
+      <body>
+        <h1><a href="/">WEB</a></h1>
+        <h2>${list}</h2>  
+        <a href="/create">create</a>
+        <p>${description}</p>
+      </body>
+      </html>
+      `;
+      response.writeHead(200);
+      response.end(template);
+    }, 100);
+
+      //내가 list파일에 <H2>태그 안 씌우니.. 위에서 계속 문제인 것마냥 오류를 계속 호출했음...
+      // 
+   
+   
+  }
+  else{
+    response.writeHead(404);
+    response.end('Not found');
+  }
   
     
-//     // console.log(__dirname + url);
-  
-     
+    // console.log(__dirname + url);
+    // response.end('egoing :'+ url);
    
-//     // response.end('egoing :'+ url);
- 
 });//create server end state;
 app.listen(3000);
 
 // JS는 혼자서 서버의 파일들을 수색할 수가 없음. 된다고하면 보안상의 무제가 더 커질거임.
+
+
+/*
+왜, after가 출력되기도 전 에 done!이 먼저 출력되는 것일까요?
+
+기본적으로 자바스크립트의 실행 환경은 프로그램의 실행을 최대한 막지 않는(non-blocking) 방식, 즉 비동기(asynchronous)로 코드를 실행해줍니다. 쉽게 말해, 나중에 실행해야 할 코드는 옆으로 잠깐 치워놓았다가, 당장 실행이 가능한 다음 코드를 먼저 처리 후에, 다시 때가되면 원래 코드를 실행해줍니다.
+
+이러한 자바스크립트의 비동기 프로그래밍 모델은 브라우저와 같이 리소스가 제한된 환경에서 성능 상의 큰 강점을 나타냅니다. 하지만 개발자 입장에서는 코드가 순서대로 실행되지 않는듯한 착시 때문에 직관적으로 이해가 어려워 자바스크립트를 배우려는 많은 분들에게 큰 걸림돌로 작용하기도 합니다.
+
+ */
