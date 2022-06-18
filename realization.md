@@ -27,7 +27,7 @@ fs.readFile('syntax/sample.txt','utf8',function(err,result){
 console.log('C');
 >>//결과는 A,C,B
 
-22.6.17 realization - callback 
+## 22.6.17 realization - callback 
 
 var a = function(){
     console.log('A'); 
@@ -53,9 +53,39 @@ ex) PM2 // 실행중인 프로그램을 모니터링 해줌. 예고없는 비정
 
 PM을 활용하면 서비스 운영이 매우 편리해짐.
 
+## '22.6.18 realization - received user-side transferring data
+
 데이터를 주고 받을 시에 
 서버에서 데이터를 가져올때는 Get 할때에는 ?~~~하는 query string을 가져오게 되고요
 데이터를 CRUD 할 경우에는 필요한 데이터를 URL로 보내면 안 되기에 POST 방식을 활용해야함.
 이렇게 사용할 경우 URL에는 흔적을 안 남기고 은밀하게 서버로 데이터를 전송함.
 
 
+post방식으로 전송된 데이터를 받는법
+이해하기 어렵다면 익숙해지기를 먼저해라. 
+
+request는 위에 create서버에 콜백함수에서 나온다.
+노드js로 웹브라우저가 접속을 들어올때마다 콜백함수를 호출합니다. 그때 인자를 2개를 주는데,
+request는 웹브라우저가 서버에 요청을 할때, response는 서버가 웹브라우저를 보낼때 쓰인다. 
+
+post방식으로 데이터를 전송할때 데이터가 엄청많으면 프로그램이 꺼진다거나 손상이 있을 수 있어서 post방식으로 전송되는 데이터가 많을경우 node.js는 조각조각의 양들을 서버쪽에서 수신될때마다 콜백함수를 호출하도록 약속이 되어있어요. 
+데이터인자를 통해서 수신한 정보를 주기로 되어있습니다.
+
+데이터가 들어오는 이벤트 처리를 이용해 전송된 데이터들을 가져오고 parse를 통해서 정보들을 객체화 할 수 있다.
+
+파일생성과 리다이렉션
+nodejs doc를 참고하여 생성을 하면 됨.
+
+writeFile('message.txt', data, { signal }, 
+function() => {
+});
+1번째 인자 : 생성할 txt 파일 이름
+2번째 인자 : 파일에 입력할 데이터
+3번째 인자 : 파일을 읽는 형식(ex: utf-8, ansi, etc) 
+4번째 인자 : 콜백함수
+
+리다이렉션은 사용자가 갈 경로를 재지정하는 것
+ response.writeHead(302,{Location:`/?id=${title}`})
+
+ http : 200 400 500 등을 알고 있어야 함.
+ 301 302는 seo 측면에서 알아두어야 하는 내용이라 할 수 있음 
