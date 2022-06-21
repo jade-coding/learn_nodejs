@@ -5,12 +5,15 @@ var qs = require('querystring');
 
 const { syncBuiltinESMExports } = require('module');
 
+//js로 만든 html파일은 결국 서버의 입장에서 파일경로를 새로 구성해서 넣어줘야함.
+//분리된 파일로 관리할경우 js에 html 파일에 <style>태그로 집어넣어주면 js로 만든 html 파일에 css 적용이 가능함.
 function templateHTML(title,list,description, control){
- return `<!doctype html>
+ return `<!doctype html> 
  <html>
  <head>
    <title>WEB1 - ${title} </title>
-   <meta charset="utf-8">
+   <meta charset="utf-8"> 
+   <link rel="stylesheet" href="./style.css">
  </head>
  <body>
    <h1><a href="/">WEB</a></h1>
@@ -40,20 +43,8 @@ var app = http.createServer(function(request,response){
     var queryData = url.parse(_url, true).query;
     var title = queryData.id;
     var pathname = url.parse(_url,true).pathname;
-    console.log(queryData.id);
-  
-   
-    // if(_url == '/' || _url == '/?'){
-    //   title = 'Web';
-    //   queryData.id='Index';
-    // }
-    // if(_url == '/favicon.ico'){
-    //     response.writeHead(404);
-    //     response.end();
-    //     return;
-    // }
-
-  console.log(pathname);
+    // console.log(queryData.id);
+    // console.log(pathname);
 
 var list ='<ul>';
 var control =  ``;
@@ -64,7 +55,13 @@ if(pathname ==='/'){
     control = `<a href="/create">create</a>`;
       }
   else{
-    control= `<a href="/create">create</a> <a href="/update?id=${title}">update</a>`;
+    control= `<a href="/create">create</a>
+              <a href="/update?id=${title}">update</a>
+              <form action="delete_process" method="post">
+                <input type="hidden" name="id" value="${title}">
+                <input type="submit" value="delete" class="deletebtn">
+              </form>
+             `;
   }
 
       // 페이지에 List 영역을 담당.
@@ -84,7 +81,6 @@ if(pathname ==='/'){
   else if(pathname ==='/create'){
     var title ="Create";
     queryData.id = 'Creation'; 
-  
     var dirlist = new Array();
     fs.readdir('./data',function(err,filelist){   // 이 구문을 벗어나면 filelist 값들을 전달받은 전역변수 dirlist의 메모리에서 다 사라짐.. 
       list = templateList(filelist);
@@ -139,8 +135,6 @@ if(pathname ==='/'){
       var post = qs.parse(body);
       var title = post.title;
       var description = post.description;
-      console.log(title);
-      console.log(description);
       fs.writeFile(`data/${title}`,description,'utf-8',
       function(err){
         response.writeHead(302,{Location:`/?id=${title}`});
@@ -157,7 +151,7 @@ if(pathname ==='/'){
         var list = templateList(filelist);
         var control=`<a href="/create">create</a> <a href="/update?id=${title}">update</a>`;
         template=templateHTML(title,list,
-        `<form action="/update_process" method="post">
+        `<form action="/update_process" method="POST">
         <p><input type="hidden" name="id" value="${title}">
         <p><input type ="text" name="title" placeholder="title" value="${title}"></p>
         <p>
@@ -174,6 +168,41 @@ if(pathname ==='/'){
     });
 
    
+  }
+  else if(pathname === '/update_process'){
+    var body='';
+    request.on('data',function(data){
+      body += data;
+    });
+    request.on('end',function(){
+      var post = qs.parse(body);
+      var id = post.id;
+      var title = post.title;
+      var description = post.description;
+      fs.rename(`data/${id}`,`data/${title}`,function(){
+        fs.writeFile(`data/${title}`,description,'utf-8',function(err){
+        response.writeHead(302,{Location:`/?id=${title}`});
+        response.end();
+      });
+
+      });
+      // console.log(post);
+    });
+  }
+  else if(pathname === '/delete_process'){
+    var body='';
+    request.on('data',function(data){
+      body += data;
+    });
+    request.on('end',function(){
+      var post = qs.parse(body);
+      var id = post.id;
+        fs.unlink(`data/${id}`,function(error){
+          response.writeHead(302,{Location:`/`});
+          response.end();
+        });
+    });
+
   }
   else{
     response.writeHead(404);
