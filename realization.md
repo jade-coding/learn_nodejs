@@ -89,3 +89,67 @@ function() => {
 
  http : 200 400 500 등을 알고 있어야 함.
  301 302는 seo 측면에서 알아두어야 하는 내용이라 할 수 있음 
+
+ ## '22.6.21
+ node js로 html을 만들어서 생성했을경우 CSS 적용하려면 정적경로 지정을 해줘야함.  express라는 모듈을 활용하여 지정하는 것 필요.
+ 추후에 공부하여 정리!!!
+
+ Object? 순서가 없는 정보를 정리함. 
+ Array 고유한 식별자가 존재함 like [0][1][2], 순서를 갖고 정리를 함
+
+var member = ['hel','hwhw'];
+console.log(member[1]);
+>> 배열
+
+var roles = {
+    'root':'admin',
+    'engineer':'Dante',
+    'designer':'rose'
+    }
+console.log(roles.designer);
+console.log(roles['designer']);
+
+>> 객체
+
+for(var name in roles){
+    console.log(name, roles[name]);
+}
+> name에는 key가 담겨짐.
+> value를 받고 싶다면 roles[name]라고 하면 값이 출력된다.
+
+js에서는 함수는 처리해야할 정보를 담고 있는 statement이면서 값이다.
+함수를 변수에 넣을 수 있기 때문에 값인 것이다.
+
+ex)
+var f = function(){
+    console.log(1+1);
+    console.log(1+2);
+}
+
+var a = [f];
+a[0]();
+
+var o ={
+    func:f
+}
+o.func();
+
+리팩토링
+기능구현은 동일하나 코드 품질을 개선하는 행위.
+
+모듈이 무엇인가?
+var m  = {
+    v:'v';
+    f:function(){
+        console.log(this.v);
+    }
+}
+
+module.exports = m; 
+m이 가리키는 모듈을 바깥에서 사용하겠다는 뜻을 가짐.
+
+그렇기에 다른 js 파일에서 아래와 같이 적어주면
+var M = require('./모듈을 만든 js 파일이름')
+M.f();
+-> 결과 출력됨.
+
