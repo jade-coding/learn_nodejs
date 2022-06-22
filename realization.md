@@ -153,3 +153,53 @@ var M = require('./모듈을 만든 js 파일이름')
 M.f();
 -> 결과 출력됨.
 
+## '22.6.22
+API(Application Program Interface)
+
+fs.readFile은 내가 만든것이 아니다. nodejs를 만든 개발자들은 파일을 읽을때는 readfile을 사용하라고 Doc에 정리하고 있음.
+사용자와 개발자간의 약속된 조작장치임
+
+nodejs의 api 문서를 보면 버전별 기능들에 대한 모듈 소개란이 있음
+확인하면서 배운다면 많은 배움을 얻을 수 있음
+
+더 배워볼만한 것으로는
+Java script, Database(mongo DB, MySQL), Framework, module API(nodejs Awesome을 검색해서 보면 신기한 module을 많이 접할 수 있음)
+
+pm2 start main.js --watch
+pm2 list
+pm2 kill - 모든 pm2로 관리하던 프로세스들 종료
+pm2 start main.js --watch --no-daemon // 로그까지 볼 수 있게 해줌
+daemon은 백그라운드에서 실행하는 것임.
+
+pm2 log로 보면 create 하게 되면 중간에 js가 꺼졌다 켜지는 것을 볼 수 있음...
+이럴경우 세션이 날라간것임. 
+-> pm2 start main.js --watch --ignore-watch="data/* 이런식으로 하면 해결할 수 있음.
+
+DNS(Domain Naming System) : IP주소를 알 수 없기에 DNS서버를 두어서 거기서 ip주소로 변환을 해주는 시스템을 갖춤
+
+인터넷에 연결된 장비들은 모두 ip를 가진다. 
+host는 네트워크에 연결된 장치를 일컫는다.
+
+hosts라는 파일에 xx.xx.xx.xx www.00000.com 이런 식으로 정리해서 해결을 할수도 있긴하다.
+
+C:\Windows\System32\drivers\etc에 host파일이 존재함.
+
+인터넷상의 보안
+hosts파일을 악의적으로 변조하여 악성페이지로 이동시킬수 있어서 취약함.
+pishing (피싱)
+
+https로 되어있는 사이트를 변조한후에 http로 된 사이트를 만들면 브라우저도 위험을 경고한다. http로 되어있다면 안전한지 다시 한번 확인해볼 필요가 있다. https가 더 안전함!
+
+++ 백신을 사용하면 hosts의 변조를 계속 모니터링함.
+
+DNS를 사용하기 이전시대에는 IP주소부를 기록해서 정리해야했다.
+hosts는 자기 pc에서만 활용할수 있는 IP주소부이다. 
+stanford research institue(스탠포드연구소)에서 전세계 hosts 파일을 관리했었음.
+해당 기관에서 host파일의 내용을 사용자의 PC hosts에 갱신해주어서 일을 처리했음. 
+
+- 문제점
+    1. 스탠포드연구소가 요청이 온것을 갱신하는데도 latency도 발생하고있음
+    2. 스탠포드연구소에서 갱신해주지 않으면 user는 원하는 destination에 접속을 할 수가 없음. 
+
+그래서 john postel, paul mockapetris는 DNS라는 것을 발명하게 됨.
+DNS의 원리
