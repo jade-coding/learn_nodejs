@@ -333,3 +333,42 @@ http response Format
 -  Cookie, web strorage 
 -  Proxy
 - 네트워크를 모니터링하는 도구들(개발자도구>네트워크,  wireshark)
+
+## '22.7.2 쿠키와 인증절차
+web이 발전하면서 개인화에 초점을 맞추게 된다.
+이전에 접속했던 사용자의 정보를 웹서버로 전송할 수 있는 쿠키를 전달하여 웹 서버는 사용자가 누구인지를 알아서 개인화를 제공해줄 수 있게 되었다.
+
+쿠키는 웹브라우저 웹 서버가 주고받는 정보이면서 HTTP 프로토콜에 포함되는 기술이다.
+http cookie라고 검색하면 추가 설명을 알 수 있다. 
+쿠키는 인증, 개인화, 방문자 트랙킹 기능을 한다. 
+Set-Cookie : <cookie-name>=<cookie-value>
+
+ex)
+Set-cookie: yummy-cookie=choco
+야미쿠키라는 쿠키는 초코라는 쿠리를 생성한다.
+한번 서버로부터  response받으면 Cookie를 받은 것을 기억하고 있다가 해닫 페이지를 다시 접속할때 서버에 함께 전송해준다.
+
+## '22.7.3 permanent cookies Session cookies
+Session 쿠키는 실행되는 동안만 유효하고 다시 키면 사라짐.
+permanent는 꺼도 쿠키가 살아있음.
+Max-Age : 현재시점에서 상대적으로 얼마나 살아있을것인지
+Expires : 절대적으로 쿠키가 언제 죽을 것인지를 나타낸다.
+
+ex)
+ 'Set-Cookie':['yummy_cookie=choco',
+                'tasty_cookie=strawberry',
+                `permanent=cookies; Max-Age=${60*60*24*30}`
+            ]
+라고하면 permanent 쿠키는 한달 뒤 expire 되는 쿠키로 존재하여 브라우저가 종료되어도 여전히 존재하게 된다.
+
+# secure and httponly cookie
+브라우저와 웹서버가 http로 통신을 할 경우에만 쿠키를 전송한다.
+secure 라는 플래그는 https request일 경우에만  response header에 해당 쿠키를 담아주게 된다.
+
+httponly라는 플래그는 js로 값을 호출해도 출력하지 않는다. 오직 http 통신에대해서만 값을 출력해준다.
+
+path 플래그는 어떤 디렉토리를 지정하면 그 디렉토리아 그 아래에서만 활성화되어 웹브라우저는 거기에 해당되는 쿠키만을 웹 서버에게 전송한다.
+
+domain 플래그는는 앞에 어떤 서브도메인에서든 살아남는다는 뜻을 가진다.
+해당 도메인에서만 살아남는다는 뜻이 아니다!!
+
